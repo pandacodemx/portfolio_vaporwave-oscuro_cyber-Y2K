@@ -1,0 +1,114 @@
+---
+import Character from "./Character.astro";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+import { sections } from "../data/sections";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const links = sections.map((s) => ({
+  id: s.id,
+  href: `#${s.id}`,
+  label: t(s.label),
+}));
+
+const primaryLink = links.find((link) => link.id === "projects");
+const secondaryLinks = links.filter((link) => link.id !== "projects");
+---
+
+<section
+  class="welcome-content relative mx-auto grid w-full grid-cols-1 items-center gap-6 px-2 py-4 md:grid-cols-[1.3fr_0.7fr] md:gap-5 [text-shadow:0_2px_0_var(--halo),0_0_14px_var(--halo)]"
+>
+  <!-- Presentación -->
+  <div class="relative z-10 flex min-w-0 flex-col items-start">
+    <!-- Etiqueta superior -->
+    <div class="mb-5 flex items-center gap-3">
+      <span aria-hidden="true" class="sparkle size-3 bg-neon-cyan"></span>
+
+      <span
+        class="font-pixel-bold text-[10px] tracking-[0.15em] text-neon-cyan uppercase"
+      >
+        SYSTEM / WELCOME
+      </span>
+
+      <span class="h-px w-10 bg-edge"></span>
+    </div>
+
+    <!-- Saludo -->
+    <p class="font-pixel text-2xl leading-none text-neon-cyan sm:text-3xl">
+      <span aria-hidden="true">&gt;</span>
+      {t("hero.greeting")}
+      <span aria-hidden="true" class="ml-1 animate-pulse">_</span>
+    </p>
+
+    <!-- Nombre -->
+    <h1
+      class="mt-4 max-w-full font-cyber text-[clamp(1.7rem,3.2vw,3rem)] font-extrabold leading-[1.12] tracking-[0.035em] text-ink [overflow-wrap:anywhere] [text-shadow:var(--title-shadow)]"
+    >
+      {t("hero.name")}
+    </h1>
+
+    <!-- Rol -->
+    <div class="mt-5 flex items-center gap-3">
+      <span class="h-0.5 w-5 shrink-0 bg-neon-pink"></span>
+
+      <p
+        class="font-pixel-bold text-[11px] tracking-[0.12em] text-neon-pink uppercase"
+      >
+        {t("hero.role")}
+      </p>
+    </div>
+
+    <!-- Descripción -->
+    <p
+      class="mt-6 max-w-[530px] font-pixel text-[clamp(1.35rem,2vw,1.65rem)] leading-[1.3] text-ink-dim"
+    >
+      {t("hero.tagline")}
+    </p>
+
+    <!-- Acciones -->
+    <nav
+      aria-label={t("nav.label")}
+      class="mt-8 flex flex-wrap items-center gap-3 [text-shadow:none]"
+    >
+      {
+        primaryLink && (
+          <a
+            href={primaryLink.href}
+            class="bevel-out inline-flex min-h-11 items-center gap-3 bg-neon-pink px-5 py-2 font-pixel-bold text-xs tracking-wider text-void uppercase transition-[filter] hover:brightness-110 active:bevel-in"
+          >
+            <span aria-hidden="true">✦</span>
+            {primaryLink.label}
+            <span aria-hidden="true">↗</span>
+          </a>
+        )
+      }
+
+      {
+        secondaryLinks.map((link) => (
+          <a href={link.href} class="btn inline-flex min-h-11 items-center">
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <!-- Línea decorativa -->
+    <div
+      aria-hidden="true"
+      class="mt-6 flex w-full max-w-[490px] items-center gap-3"
+    >
+      <span class="h-px flex-1 bg-edge"></span>
+      <span class="font-pixel text-sm text-neon-cyan"> ◇ </span>
+      <span class="h-px w-10 bg-edge"></span>
+    </div>
+  </div>
+
+  <!-- Personaje -->
+  <div
+    class="relative z-10 flex min-w-0 items-center justify-center md:justify-end"
+  >
+    <Character />
+  </div>
+
+</section>

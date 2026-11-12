@@ -1,0 +1,129 @@
+---
+/**
+ * Palmera en silueta, dibujada con código (sin imágenes externas).
+ * Ajusta `fronds` para cambiar la forma de las hojas:
+ *   deg   = dirección (0 = derecha, -90 = arriba, 180 = izquierda)
+ *   len   = largo de la hoja
+ *   droop = cuánto cae la punta (0 = recta)
+ */
+interface Props {
+  class?: string;
+  flip?: boolean;
+}
+const { class: className = "", flip = false } = Astro.props;
+
+// Lienzo y copa
+const W = 400;
+const H = 560;
+const crown = { x: 200, y: 175 };
+
+const fronds = [
+  { deg: -172, len: 165, droop: 0.55 },
+  { deg: -148, len: 150, droop: 0.3 },
+  { deg: -122, len: 125, droop: 0.12 },
+  { deg: -90, len: 105, droop: 0 },
+  { deg: -58, len: 125, droop: 0.12 },
+  { deg: -32, len: 150, droop: 0.3 },
+  { deg: -8, len: 165, droop: 0.55 },
+  { deg: 160, len: 120, droop: 0.6 },
+  { deg: 20, len: 120, droop: 0.6 },
+];
+
+/** Una hoja: forma de lente desde la copa hasta la punta, arqueada hacia arriba. */
+function frond(deg: number, len: number, droop: number): string {
+  const a = (deg * Math.PI) / 180;
+  const dx = Math.cos(a);
+  const dy = Math.sin(a);
+  const tip = {
+    x: crown.x + dx * len,
+    y: crown.y + dy * len + droop * Math.abs(dx) * len,
+  };
+
+  // Perpendicular a la hoja, apuntando hacia arriba
+  const ux = tip.x - crown.x;
+  const uy = tip.y - crown.y;
+  const norm = Math.hypot(ux, uy);
+  let nx = -uy / norm;
+  let ny = ux / norm;
+  if (ny > 0) {
+    nx = -nx;
+    ny = -ny;
+  }
+
+  const mid = { x: crown.x + ux * 0.55, y: crown.y + uy * 0.55 };
+  const top = { x: mid.x + nx * len * 0.22, y: mid.y + ny * len * 0.22 };
+  const bottom = { x: mid.x - nx * len * 0.05, y: mid.y - ny * len * 0.05 };
+
+  const f = (n: number) => n.toFixed(1);
+  return `M${f(crown.x)} ${f(crown.y)} Q${f(top.x)} ${f(top.y)} ${f(tip.x)} ${f(tip.y)} Q${f(bottom.x)} ${f(bottom.y)} ${f(crown.x)} ${f(crown.y)}Z`;
+}
+
+// Tronco: curva de Bézier cúbica (línea central) con ancho que se reduce hacia arriba
+const P = [
+  { x: 150, y: H },
+  { x: 165, y: 440 },
+  { x: 186, y: 310 },
+  { x: crown.x, y: crown.y },
+];
+const bez = (t: number) => {
+  const m = 1 - t;
+  const c = [m * m * m, 3 * m * m * t, 3 * m * t * t, t * t * t];
+  return {
+    x: c[0] * P[0].x + c[1] * P[1].x + c[2] * P[2].x + c[3] * P[3].x,
+    y: c[0] * P[0].y + c[1] * P[1].y + c[2] * P[2].y + c[3] * P[3].y,
+  };
+};
+const halfWidth = (t: number) => 11 - 6 * t;
+
+const steps = 24;
+const left: string[] = [];
+const right: string[] = [];
+for (let i = 0; i <= steps; i++) {
+  const t = i / steps;
+  const p = bez(t);
+  left.push(`${(p.x - halfWidth(t)).toFixed(1)} ${p.y.toFixed(1)}`);
+  right.unshift(`${(p.x + halfWidth(t)).toFixed(1)} ${p.y.toFixed(1)}`);
+}
+const trunk = `M${left.join(" L")} L${right.join(" L")}Z`;
+
+// Anillos del tronco
+const rings = Array.from({ length: 13 }, (_, i) => {
+  const t = 0.07 + i * 0.07;
+  const p = bez(t);
+  const w = halfWidth(t);
+  return { x1: p.x - w, y1: p.y, x2: p.x + w, y2: p.y + 4 };
+});
+---
+
+<svg
+  viewBox={`0 0 ${W} ${H}`}
+  class:list={[
+    "palm-sway origin-bottom animate-sway",
+    flip && "-scale-x-100",
+    className,
+  ]}
+  aria-hidden="true"
+>
+  <path d={trunk} style="fill: var(--palm-trunk)"></path>
+  {
+    rings.map((r) => (
+      <line
+        x1={r.x1.toFixed(1)}
+        y1={r.y1.toFixed(1)}
+        x2={r.x2.toFixed(1)}
+        y2={r.y2.toFixed(1)}
+        style="stroke: var(--palm-ring)"
+        stroke-width="2"
+        opacity="0.7"
+      />
+    ))
+  }
+  <g style="fill: var(--palm-leaf)">
+    {fronds.map((f) => <path d={frond(f.deg, f.len, f.droop)} />)}
+  </g>
+  <g style="fill: var(--palm-trunk)">
+    <circle cx={crown.x - 9} cy={crown.y + 10} r="7"></circle>
+    <circle cx={crown.x + 8} cy={crown.y + 12} r="7"></circle>
+    <circle cx={crown.x} cy={crown.y + 20} r="6.5"></circle>
+  </g>
+</svg>

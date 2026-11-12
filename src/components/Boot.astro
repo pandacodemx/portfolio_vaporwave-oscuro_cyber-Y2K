@@ -1,0 +1,29 @@
+---
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+const t = useTranslations(getLangFromUrl(Astro.url));
+const lines = [t('boot.l1'), t('boot.l2'), t('boot.l3'), t('boot.l4')];
+---
+
+<!--
+  Pantalla de arranque. Siempre es oscura (como un monitor al encender).
+  La lógica está en src/scripts/boot.ts; se salta con clic o tecla.
+-->
+<div
+  id="boot"
+  aria-hidden="true"
+  data-lines={JSON.stringify(lines)}
+  class="boot fixed inset-0 z-[100] grid place-items-center bg-[#05020c] font-pixel text-[#00f0ff]"
+>
+  <div class="w-[min(32rem,88vw)] space-y-4">
+    <p class="font-pixel-bold text-xs tracking-widest text-[#ff2bd6] uppercase">
+      {t('hero.name')} · BIOS v1.0
+    </p>
+    <ul id="boot-lines" class="min-h-[8rem] space-y-1 text-xl leading-snug"></ul>
+    <div class="h-7 border-2 border-[#3b2a6e] p-0.5">
+      <div id="boot-bar" class="boot-bar h-full w-0"></div>
+    </div>
+    <p class="text-base text-[#9a92c4]">{t('boot.skip')}</p>
+  </div>
+  <div class="scanlines pointer-events-none absolute inset-0"></div>
+</div>

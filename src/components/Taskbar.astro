@@ -1,0 +1,188 @@
+---
+import { getLangFromUrl, useTranslations, switchLangPath } from '../i18n/utils';
+import { sections } from '../data/sections';
+import type { Lang } from '../i18n/ui';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const otherLang: Lang = lang === 'es' ? 'en' : 'es';
+const otherHref = switchLangPath(Astro.url, otherLang);
+---
+
+<footer
+  class="fixed inset-x-0 bottom-0 z-50 flex h-11 items-center gap-2 border-t-2 border-bevel-light bg-panel px-1.5 text-ink"
+>
+  <!-- Botón Inicio: abre el menú (lógica en src/scripts/desktop.ts) -->
+  <button
+    type="button"
+    id="start-button"
+    aria-haspopup="menu"
+    aria-expanded="false"
+    aria-controls="start-menu"
+    class="bevel-out flex h-8 cursor-pointer items-center gap-2 bg-panel px-3 font-pixel-bold text-xs tracking-wider text-ink uppercase hover:text-neon-cyan active:bevel-in"
+  >
+    <span aria-hidden="true" class="sparkle block size-4 bg-neon-pink"></span>
+    {t('taskbar.start')}
+  </button>
+
+  <!-- Menú Inicio -->
+  <div
+    id="start-menu"
+    role="menu"
+    aria-label={t('taskbar.start')}
+    hidden
+    class="fixed bottom-11 left-1.5 z-50 flex w-[min(18rem,calc(100vw-12px))] bevel-out bg-panel p-1 shadow-[var(--window-shadow)]"
+  >
+    <div
+      aria-hidden="true"
+      class="flex w-10 shrink-0 items-end justify-center bg-linear-to-t from-neon-pink to-edge py-2"
+    >
+      <span
+        class="rotate-180 font-pixel-bold text-sm tracking-widest text-white uppercase [writing-mode:vertical-rl]"
+      >
+        {t('hero.name')}
+      </span>
+    </div>
+
+    <ul class="min-w-0 flex-1 py-1">
+      {
+        sections.map((s) => (
+          <li role="none">
+            <a role="menuitem" href={`#${s.id}`} class="start-item">
+              <span aria-hidden="true" class="sparkle block size-3 shrink-0 bg-neon-cyan" />
+              {t(s.label)}
+            </a>
+          </li>
+        ))
+      }
+      <li role="none" aria-hidden="true">
+        <hr class="mx-2 my-1 border-t-2 border-edge" />
+      </li>
+      <li role="none">
+        <button type="button" role="menuitem" data-start-action="restore-all" class="start-item">
+          <span aria-hidden="true" class="sparkle block size-3 shrink-0 bg-neon-pink"></span>
+          {t('start.restoreAll')}
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <button type="button" id="show-desktop" class="winbtn shrink-0" aria-label={lang === 'es' ? 'Mostrar escritorio' : 'Show desktop'} title={lang === 'es' ? 'Mostrar escritorio' : 'Show desktop'}><svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 3h20v14H2zM8 21h8M12 17v4" /></svg></button>
+  <span aria-hidden="true" class="mx-1 h-7 w-0.5 bg-edge"></span>
+
+  <!--
+    Aquí aparecen los botones de las ventanas minimizadas.
+    En móvil forman una franja propia sobre la barra (y se oculta si no hay ninguno).
+  -->
+  <div
+    id="taskbar-windows"
+    data-count="0"
+    role="toolbar"
+    aria-label={t('taskbar.windows')}
+    class="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto [scrollbar-width:none] max-sm:fixed max-sm:inset-x-0 max-sm:bottom-11 max-sm:flex-none max-sm:border-t-2 max-sm:border-bevel-light max-sm:bg-panel max-sm:p-1.5 max-sm:data-[count='0']:hidden"
+  >
+  </div>
+
+  <!-- Bandeja del sistema: tema + idioma + reloj -->
+  <div class="bevel-in flex h-8 shrink-0 items-center gap-3 bg-void px-3 text-lg">
+    <button
+      type="button"
+      id="theme-toggle"
+      data-label-to-light={t('theme.toLight')}
+      data-label-to-dark={t('theme.toDark')}
+      aria-label={t('theme.toLight')}
+      title={t('theme.toLight')}
+      class="grid size-6 cursor-pointer place-items-center text-ink hover:text-neon-pink"
+    >
+      <!-- Sol: se ve en modo oscuro (al pulsar pasa a claro) -->
+      <svg
+        class="block size-5 light:hidden"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="square"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="5"></circle>
+        <path
+          d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"
+        ></path>
+      </svg>
+      <!-- Luna: se ve en modo claro (al pulsar pasa a oscuro) -->
+      <svg
+        class="hidden size-5 light:block"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="square"
+        aria-hidden="true"
+      >
+        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+      </svg>
+    </button>
+
+    <a
+      href={otherHref}
+      hreflang={otherLang}
+      lang={otherLang}
+      aria-label={t('lang.switch')}
+      class="font-pixel-bold text-xs text-neon-pink hover:text-acid"
+    >
+      {otherLang.toUpperCase()}
+    </a>
+    <time id="clock" class="text-neon-cyan tabular-nums">--:--</time>
+  </div>
+</footer>
+
+<script>
+  /* ---- Reloj ---- */
+  const clock = document.getElementById('clock') as HTMLTimeElement | null;
+
+  if (clock) {
+    const format = new Intl.DateTimeFormat(document.documentElement.lang || 'es', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    });
+
+    const tick = () => {
+      const now = new Date();
+      clock.textContent = format.format(now);
+      clock.dateTime = now.toISOString();
+    };
+
+    tick();
+    setInterval(tick, 15_000);
+  }
+
+  /* ---- Cambio de tema (el tema inicial lo pone el script del <head>) ---- */
+  const toggle = document.getElementById('theme-toggle') as HTMLButtonElement | null;
+  const root = document.documentElement;
+  const themeColor = document.querySelector('meta[name="theme-color"]');
+
+  if (toggle) {
+    const syncLabel = () => {
+      const isLight = root.dataset.theme === 'light';
+      const label = isLight ? toggle.dataset.labelToDark : toggle.dataset.labelToLight;
+      toggle.setAttribute('aria-label', label ?? '');
+      toggle.title = label ?? '';
+      themeColor?.setAttribute('content', isLight ? '#2bb8ff' : '#0a0614');
+    };
+
+    toggle.addEventListener('click', () => {
+      const next = root.dataset.theme === 'light' ? 'dark' : 'light';
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem('theme', next);
+      } catch {
+        /* modo privado: el tema solo dura esta visita */
+      }
+      syncLabel();
+    });
+
+    syncLabel();
+  }
+</script>

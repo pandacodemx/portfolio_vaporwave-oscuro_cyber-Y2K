@@ -1,0 +1,76 @@
+---
+import Palm from "./Palm.astro";
+import Skyline from "./Skyline.astro";
+
+type Sparkle = {
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+  delay: number;
+};
+
+// Posiciones fijas (en % del cielo) para que el diseño sea estable entre builds.
+const sparkles: Sparkle[] = [
+  { x: 6, y: 14, size: 22, color: "bg-neon-cyan", delay: 0 },
+  { x: 18, y: 40, size: 12, color: "bg-chrome", delay: 1.2 },
+  { x: 29, y: 8, size: 16, color: "bg-neon-pink", delay: 0.6 },
+  { x: 41, y: 32, size: 10, color: "bg-chrome", delay: 2.1 },
+  { x: 55, y: 12, size: 26, color: "bg-neon-cyan", delay: 1.6 },
+  { x: 67, y: 38, size: 12, color: "bg-acid", delay: 0.3 },
+  { x: 78, y: 10, size: 18, color: "bg-neon-pink", delay: 2.6 },
+  { x: 90, y: 30, size: 24, color: "bg-chrome", delay: 0.9 },
+  { x: 95, y: 6, size: 10, color: "bg-neon-cyan", delay: 1.9 },
+];
+---
+
+<!--
+  Fondo decorativo
+-->
+<div
+  aria-hidden="true"
+  class="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+>
+  <div class="sky absolute inset-x-0 top-0 h-[60%]"></div>
+
+  <div class="sun-wrap">
+    <div class="sun-glow"></div>
+    <div class="sun"></div>
+  </div>
+
+  <!-- Ciudad a los lados, detrás del suelo (solo tema oscuro) -->
+  <div class="skyline">
+    <Skyline seed={17} class="absolute bottom-[calc(40%-2px)] left-0" />
+    <Skyline seed={45} flip class="absolute right-0 bottom-[calc(40%-2px)]" />
+  </div>
+
+  <div class="floor absolute inset-x-0 bottom-0 h-[40%] overflow-hidden">
+    <div class="floor-grid absolute top-0 -left-full h-[60vh] w-[300%]"></div>
+    <div class="horizon-glow absolute inset-x-0 top-0 h-1/2"></div>
+    <div class="floor-fade absolute inset-0"></div>
+  </div>
+
+  <!-- Palmeras (tema claro) -->
+  <div class="palms">
+    <Palm class="absolute bottom-0 -left-[4vw] h-[min(42vh,80vw)]" />
+    <Palm flip class="absolute -right-[4vw] bottom-0 h-[min(34vh,64vw)]" />
+  </div>
+
+  <div class="sky-sparkles absolute inset-x-0 top-0 h-[60%]">
+    {
+      sparkles.map((s) => (
+        <span
+          class={`sparkle absolute animate-twinkle ${s.color}`}
+          style={`left:${s.x}%;top:${s.y}%;width:${s.size}px;height:${s.size}px;animation-delay:${s.delay}s`}
+        />
+      ))
+    }
+  </div>
+</div>
+
+<!-- Efecto CRT encima de todo -->
+<div
+  aria-hidden="true"
+  class="scanlines pointer-events-none fixed inset-0 z-[60]"
+>
+</div>

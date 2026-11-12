@@ -1,0 +1,100 @@
+---
+import Window from "./Window.astro";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+import { projects } from "../data/content";
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<div id="projects">
+  <Window id="win-projects" title={lang === "es" ? "Proyectos — explorador" : "Projects — explorer"}>
+  <div class="project-grid grid grid-cols-1 gap-6 md:grid-cols-2">
+  {
+    projects.map((project, i) => (
+        <article class="group flex flex-col">
+          {/* Vista previa */}
+          <div class="relative overflow-hidden border border-ink-dim/30 bg-night">
+            {project.image ? (
+              <img
+                src={project.image}
+                alt={`${t("projects.previewAlt")} ${project.name[lang]}`}
+                loading="lazy"
+                class="aspect-video w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.035]"
+              />
+            ) : (
+              <div class="grid aspect-video place-items-center font-pixel-bold text-xs text-ink-dim">
+                [ {t("projects.noPreview")} ]
+              </div>
+            )}
+
+            <span class="absolute bottom-2 left-2 border border-cyan-400/50 bg-night/90 px-2 py-1 font-mono text-[10px] tracking-widest text-cyan-300">
+              PREVIEW_0{i + 1}
+            </span>
+          </div>
+
+          {/* Información */}
+          <div class="flex flex-1 flex-col pt-4">
+            <div class="mb-2 flex items-center justify-between gap-3">
+              <span class="font-mono text-[10px] tracking-[0.18em] text-cyan-400">
+                PROJECT_{String(i + 1).padStart(2, "0")}
+              </span>
+
+              <span class="font-mono text-[10px] tracking-wider text-emerald-400">
+                {project.private ? (lang === "es" ? "● PRIVADO" : "● PRIVATE") : "● ONLINE"}
+              </span>
+            </div>
+
+            <h3 class="font-cyber text-xl font-semibold leading-tight text-ink">
+              {project.name[lang]}
+            </h3>
+
+            <p class="mt-3 text-sm leading-7 text-ink-dim">
+              {project.description[lang]}
+            </p>
+
+            {/* Tecnologías */}
+            <ul class="mt-5 flex flex-wrap gap-2">
+              {project.tags.map((tag) => (
+                <li class="chip text-xs">{tag}</li>
+              ))}
+            </ul>
+
+            {/* Barra inferior */}
+            <div class="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-ink-dim/25 pt-4">
+              <span class="font-mono text-[10px] tracking-wider text-ink-dim">
+                SYS.READY_
+              </span>
+
+              <div class="flex flex-wrap gap-2">
+                {project.repo && (
+                  <a
+                    href={project.repo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn"
+                  >
+                    {t("projects.code")}
+                  </a>
+                )}
+
+                {project.demo && (
+                  <a
+                    href={project.demo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn"
+                  >
+                    ↗ {t("projects.demo")}
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        </article>
+
+    ))
+  }
+  </div>
+  </Window>
+</div>

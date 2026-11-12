@@ -1,0 +1,610 @@
+@import "tailwindcss";
+
+/* Fuentes locales  */
+@import "@fontsource/vt323";
+@import "@fontsource/orbitron/600.css";
+@import "@fontsource/orbitron/800.css";
+@import "@fontsource/silkscreen/400.css";
+
+/* Variante `light:` -> clases que solo aplican en modo claro (ej. light:hidden) */
+@custom-variant light (&:where([data-theme='light'], [data-theme='light'] *));
+
+/*
+  Tokens de diseño (tema OSCURO por defecto): vaporwave oscuro + cyber Y2K.
+  `static` hace que Tailwind emita TODAS las variables, así también
+  podemos usarlas con var(--color-...) en el CSS de abajo.
+  El tema claro redefine estos mismos tokens más abajo.
+*/
+@theme static {
+  /* Fondos */
+  --color-void: #0a0614;
+  --color-night: #140a2e;
+  --color-panel: #1a1033;
+  --color-edge: #3b2a6e;
+
+  /* Acentos neón */
+  --color-neon-pink: #ff2bd6;
+  --color-neon-cyan: #00f0ff;
+  --color-acid: #d4ff3a;
+
+  /* Cromo / texto */
+  --color-chrome: #c8c8e0;
+  --color-ink: #e8e4ff;
+  --color-ink-dim: #9a92c4;
+
+  /* Biseles estilo Windows 9x (luz arriba-izquierda, sombra abajo-derecha) */
+  --color-bevel-light: #7b6abf;
+  --color-bevel-dark: #07030f;
+
+  /* Tipografías */
+  --font-pixel: "VT323", ui-monospace, monospace;
+  --font-pixel-bold: "Silkscreen", "VT323", monospace;
+  --font-cyber: "Orbitron", ui-sans-serif, system-ui, sans-serif;
+
+  /* Sombras de neón */
+  --shadow-glow-pink: 0 0 12px rgb(255 43 214 / 0.55);
+  --shadow-glow-cyan: 0 0 12px rgb(0 240 255 / 0.5);
+
+  /* Animaciones */
+  --animate-grid-scroll: grid-scroll 1.6s linear infinite;
+  --animate-twinkle: twinkle 3.4s ease-in-out infinite;
+  --animate-float: float 4.5s ease-in-out infinite;
+  --animate-sway: sway 7s ease-in-out infinite;
+  --animate-pop: pop 0.18s ease-out;
+
+  /* 48px = tamaño de celda de .floor-grid (si cambias uno, cambia el otro) */
+  @keyframes grid-scroll {
+    to {
+      background-position-y: 48px;
+    }
+  }
+
+  @keyframes twinkle {
+    0%,
+    100% {
+      opacity: 0.25;
+      transform: scale(0.75);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes sway {
+    0%,
+    100% {
+      transform: rotate(-1.2deg);
+    }
+    50% {
+      transform: rotate(1.2deg);
+    }
+  }
+
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+/* ---------- Utilidades retro ---------- */
+
+/* Borde "salido" (botones, ventanas) */
+@utility bevel-out {
+  border: 2px solid;
+  border-color: var(--color-bevel-light) var(--color-bevel-dark)
+    var(--color-bevel-dark) var(--color-bevel-light);
+}
+
+/* Borde "hundido" (campos, bandeja, botón presionado) */
+@utility bevel-in {
+  border: 2px solid;
+  border-color: var(--color-bevel-dark) var(--color-bevel-light)
+    var(--color-bevel-light) var(--color-bevel-dark);
+}
+
+/* Estrella de 4 puntas estilo Y2K: se le da color con bg-* */
+@utility sparkle {
+  clip-path: polygon(
+    50% 0,
+    61% 39%,
+    100% 50%,
+    61% 61%,
+    50% 100%,
+    39% 61%,
+    0 50%,
+    39% 39%
+  );
+}
+
+/* ---------- Variables de la escena (tema oscuro por defecto) ---------- */
+@layer base {
+  :root {
+    color-scheme: dark;
+
+    --sky: linear-gradient(
+      to bottom,
+      #0a0614 0%,
+      #140a2e 40%,
+      #2d0b4e 68%,
+      #7a1a78 92%,
+      #a3198f 100%
+    );
+    --stars-opacity: 1;
+
+    --sun-size: min(34vh, 62vw, 300px);
+    --sun-bottom: 40%;
+    --sun-sink: 14%;
+    --sun-fill: linear-gradient(
+      to bottom,
+      #ff9d6b 0%,
+      #ff2bd6 55%,
+      #5a2bd6 100%
+    );
+    --sun-opacity: 0.72;
+    --sun-glow: rgb(255 43 214 / 0.45);
+    --sun-mask:
+      linear-gradient(#000, #000),
+      repeating-linear-gradient(to bottom, #000 0 11px, transparent 11px 16px);
+
+    --floor: linear-gradient(to bottom, #1d0638 0%, #0a0614 100%);
+    --grid-v: rgb(255 43 214 / 0.55);
+    --grid-h: rgb(0 240 255 / 0.45);
+    --horizon: rgb(194 32 159 / 0.4);
+    --floor-fade: #0a0614;
+
+    --scan: rgb(0 0 0 / 0.08);
+    --vignette: rgb(0 0 0 / 0.45);
+
+    --title-shadow: 0 0 14px rgb(255 43 214 / 0.6);
+    --halo: #0a0614;
+
+    /* Ventanas */
+    --titlebar-pink: linear-gradient(
+      90deg,
+      #e01fc0 0%,
+      #7b2cff 65%,
+      #2a0f6b 100%
+    );
+    --titlebar-cyan: linear-gradient(
+      90deg,
+      #0089a0 0%,
+      #2a4bd7 65%,
+      #140a3e 100%
+    );
+    --titlebar-inactive: linear-gradient(90deg, #3b2a6e, #1a1033);
+    --window-shadow:
+      4px 4px 0 rgb(0 0 0 / 0.55), 0 0 22px rgb(255 43 214 / 0.22);
+  }
+
+  /* ---------- TEMA CLARO: día tropical con sol, mar y palmeras ---------- */
+  :root[data-theme="light"] {
+    color-scheme: light;
+
+    --color-void: #eafaff;
+    --color-night: #c8ecff;
+    --color-panel: #d9e6f7;
+    --color-edge: #7d9cc9;
+
+    --color-neon-pink: #d6109c;
+    --color-neon-cyan: #007b9a;
+    --color-acid: #6f8f00;
+
+    --color-chrome: #5a6aa0;
+    --color-ink: #1a1246;
+    --color-ink-dim: #4b4685;
+
+    --color-bevel-light: #ffffff;
+    --color-bevel-dark: #4d5d8a;
+
+    --shadow-glow-pink: 0 0 10px rgb(214 16 156 / 0.3);
+    --shadow-glow-cyan: 0 0 10px rgb(0 123 154 / 0.3);
+
+    --sky: linear-gradient(
+      to bottom,
+      #2bb8ff 0%,
+      #6fd9ff 35%,
+      #bff3ff 62%,
+      #ffe6a3 88%,
+      #ffc27a 100%
+    );
+    --stars-opacity: 0;
+
+    --sun-size: min(38vh, 70vw, 340px);
+    --sun-bottom: 50%;
+    --sun-sink: 0%;
+    --sun-fill: radial-gradient(
+      circle at 50% 45%,
+      #fffbd6 0%,
+      #ffe27a 42%,
+      #ffb23f 100%
+    );
+    --sun-opacity: 1;
+    --sun-glow: rgb(255 214 90 / 0.7);
+    --sun-mask: none;
+
+    --floor: linear-gradient(to bottom, #35e0d0 0%, #0b86b4 55%, #07557f 100%);
+    --grid-v: rgb(255 255 255 / 0.5);
+    --grid-h: rgb(255 255 255 / 0.4);
+    --horizon: rgb(255 236 170 / 0.55);
+    --floor-fade: #06486c;
+
+    --scan: rgb(0 0 0 / 0.04);
+    --vignette: rgb(0 40 80 / 0.18);
+
+    --title-shadow: 0 2px 0 rgb(255 255 255 / 0.6);
+    --halo: rgb(255 255 255 / 0.75);
+
+    --titlebar-pink: linear-gradient(
+      90deg,
+      #d6109c 0%,
+      #7a3cff 70%,
+      #2a2f9e 100%
+    );
+    --titlebar-cyan: linear-gradient(
+      90deg,
+      #0b86b4 0%,
+      #2a5bd7 70%,
+      #1f2f8e 100%
+    );
+    --titlebar-inactive: linear-gradient(90deg, #9fb4d6, #c3d3ea);
+    --window-shadow:
+      4px 4px 0 rgb(26 18 70 / 0.35), 0 0 18px rgb(255 255 255 / 0.4);
+
+    /* Palmeras (solo existen en el tema claro) */
+    --palm-leaf: #10295a;
+    --palm-trunk: #2a1d5e;
+    --palm-ring: #4b3a9a;
+  }
+}
+
+@layer base {
+  html {
+    background-color: var(--color-void);
+    color: var(--color-ink);
+    font-family: var(--font-pixel);
+    font-size: 20px; /* VT323 es pequeña: subimos la base */
+    -webkit-font-smoothing: none;
+  }
+
+  body {
+    min-height: 100dvh;
+    margin: 0;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  /* Desplazamiento suave al pulsar los enlaces de sección */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  ::selection {
+    background: var(--color-neon-pink);
+    color: var(--color-void);
+  }
+
+  /* Accesibilidad: sin animaciones si el sistema lo pide */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+}
+
+/* ---------- Capas del escritorio ---------- */
+@layer components {
+  /* Cielo + estrellitas (las estrellas son un pseudo-elemento) */
+  .sky {
+    background: var(--sky);
+  }
+
+  .sky::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: var(--stars-opacity);
+    background-image:
+      radial-gradient(1px 1px at 20px 30px, #fff, transparent),
+      radial-gradient(1px 1px at 90px 80px, #00f0ff, transparent),
+      radial-gradient(1px 1px at 150px 20px, #fff, transparent),
+      radial-gradient(1px 1px at 60px 140px, #c8c8e0, transparent),
+      radial-gradient(1px 1px at 180px 120px, #ff2bd6, transparent);
+    background-size: 200px 170px;
+  }
+
+  /* Sol: el contenedor lo coloca, el brillo y el disco van dentro */
+  .sun-wrap {
+    position: absolute;
+    left: 50%;
+    bottom: var(--sun-bottom);
+    height: var(--sun-size);
+    aspect-ratio: 1;
+    transform: translate(-50%, var(--sun-sink));
+  }
+
+  .sun-glow {
+    position: absolute;
+    inset: -55%;
+    background: radial-gradient(closest-side, var(--sun-glow), transparent);
+  }
+
+  /* Disco del sol; en oscuro la mitad inferior lleva franjas (máscara) */
+  .sun {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    opacity: var(--sun-opacity);
+    background: var(--sun-fill);
+    -webkit-mask-image: var(--sun-mask);
+    mask-image: var(--sun-mask);
+    -webkit-mask-size: 100% 50%;
+    mask-size: 100% 50%;
+    -webkit-mask-position: top, bottom;
+    mask-position: top, bottom;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+
+  /* Suelo: el contenedor da la perspectiva, la rejilla se inclina */
+  .floor {
+    background: var(--floor);
+    perspective: 420px;
+  }
+
+  .floor-grid {
+    transform-origin: 50% 0;
+    transform: rotateX(62deg);
+    background-image:
+      linear-gradient(to right, var(--grid-v) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-h) 1px, transparent 1px);
+    background-size: 48px 48px;
+    animation: var(--animate-grid-scroll);
+    /* Desvanece el horizonte para evitar el efecto moiré */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%);
+    mask-image: linear-gradient(to bottom, transparent 0%, #000 22%);
+  }
+
+  .horizon-glow {
+    background: linear-gradient(to bottom, var(--horizon), transparent);
+  }
+
+  /* Oscurece el borde inferior del suelo (las líneas cercanas se ven gruesas) */
+  .floor-fade {
+    background: linear-gradient(
+      to bottom,
+      transparent 40%,
+      var(--floor-fade) 100%
+    );
+  }
+
+  /* ---------- Ventanas ---------- */
+  .window {
+    box-shadow: var(--window-shadow);
+  }
+
+  .titlebar {
+    background: var(--titlebar-pink);
+    text-shadow: 0 1px 0 rgb(0 0 0 / 0.55);
+  }
+
+  .titlebar-cyan {
+    background: var(--titlebar-cyan);
+  }
+
+  /* Ventana sin foco (se activará en la etapa de interacción) */
+  .window[data-active="false"] .titlebar {
+    background: var(--titlebar-inactive);
+    text-shadow: none;
+  }
+
+  /* Botón cuadrado de la barra de título */
+  .winbtn {
+    @apply bevel-out grid size-6 cursor-pointer place-items-center bg-panel text-ink hover:text-neon-pink active:bevel-in;
+  }
+
+  /* Ventana maximizada: flota centrada sobre el contenido, encima de la barra de tareas */
+  .window.is-maximized {
+    position: fixed;
+    top: 0.5rem;
+    bottom: calc(2.75rem + 0.5rem);
+    left: 50%;
+    width: min(1100px, calc(100% - 1rem));
+    transform: translateX(-50%);
+    z-index: 40;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  .window.is-maximized .titlebar {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  /* Botón de ventana oculta en la barra de tareas */
+  .taskbtn {
+    @apply bevel-out flex h-8 max-w-44 min-w-0 shrink-0 cursor-pointer items-center gap-2 bg-panel px-2 font-pixel-bold text-xs tracking-wider text-ink uppercase hover:text-neon-cyan active:bevel-in;
+  }
+
+  /* Elemento del menú Inicio */
+  .start-item {
+    @apply flex w-full cursor-pointer items-center gap-3 px-3 py-2 text-left font-pixel-bold text-xs tracking-wider text-ink uppercase outline-none hover:bg-neon-pink hover:text-void focus-visible:bg-neon-pink focus-visible:text-void;
+  }
+
+  /* Pantalla de arranque */
+  .boot {
+    transition: opacity 0.4s ease;
+  }
+
+  .boot-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .boot-bar {
+    background: repeating-linear-gradient(
+      90deg,
+      #ff2bd6 0 10px,
+      transparent 10px 14px
+    );
+  }
+
+  html[data-boot="done"] #boot,
+  html[data-boot="skip"] #boot {
+    display: none !important;
+  }
+
+  /* Etiqueta hundida (tecnologías, tags) */
+  .chip {
+    @apply bevel-in bg-night px-2 text-base text-neon-cyan;
+  }
+
+  /* Botón de texto estándar (OK, Enviar...) */
+  .btn {
+    @apply bevel-out cursor-pointer bg-panel px-4 py-1 font-pixel-bold text-xs tracking-wider text-ink uppercase hover:text-neon-cyan active:bevel-in;
+  }
+
+  /* Ciudad: solo visible en el tema oscuro */
+  :root[data-theme="light"] .skyline {
+    display: none;
+  }
+
+  /* Palmeras: solo visibles en el tema claro */
+  .palms {
+    display: none;
+  }
+
+  :root[data-theme="light"] .palms {
+    display: block;
+  }
+
+  /* Scanlines de monitor CRT + viñeta */
+  .scanlines {
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        var(--scan) 0 1px,
+        transparent 1px 3px
+      ),
+      radial-gradient(ellipse at center, transparent 55%, var(--vignette) 100%);
+  }
+}
+
+/* ---------- Ajustes del tema claro fuera de capas (ganan a las utilidades) ---------- */
+/* Los destellos del cielo pasan a ser brillos blancos del sol */
+:root[data-theme="light"] .sky-sparkles > span {
+  background-color: #fff;
+}
+
+/* Desktop navigation: scroll belongs to window content, never to the workspace. */
+html[data-desktop="ready"], html[data-desktop="ready"] body {
+  height: 100%;
+  overflow: hidden;
+}
+#desktop-workspace { position: relative; isolation: isolate; height: calc(100dvh - 2.75rem); overflow: hidden; }
+.desktop-shortcuts {
+  position: absolute; inset: 1.25rem auto auto 1rem;
+  display: flex; flex-direction: column; gap: .65rem; z-index: 1;
+}
+.desktop-shortcut {
+  width: 5.5rem; min-height: 4.65rem; padding: .4rem .2rem;
+  display: flex; flex-direction: column; align-items: center; gap: .35rem;
+  text-align: center; font-size: .9rem; line-height: 1.05;
+  border: 1px solid transparent; text-shadow: 1px 2px 2px var(--color-void);
+}
+.desktop-shortcut:hover, .desktop-shortcut:focus-visible {
+  background: color-mix(in srgb, var(--color-neon-cyan) 12%, transparent);
+  border: 1px dotted var(--color-neon-cyan); outline: none;
+}
+.desktop-icon { position: relative; display: block; width: 2.4rem; height: 2.4rem; color: var(--color-neon-cyan); filter: drop-shadow(2px 3px 0 var(--color-void)); }
+.desktop-icon svg { width: 100%; height: 100%; }
+.desktop-icon-projects { color: #ffd572; }
+.desktop-icon-about, .desktop-icon-contact { color: var(--color-neon-pink); }
+.shortcut-arrow { position: absolute; left: -.15rem; bottom: -.1rem; background: var(--color-panel); border: 1px solid var(--color-ink-dim); color: var(--color-ink); font: .65rem/1 monospace; text-shadow: none; }
+.desktop-signature { position: absolute; right: 1.75rem; bottom: 2.75rem; text-align: right; opacity: .6; display: grid; gap: .35rem; pointer-events: none; }
+.desktop-signature > span:first-child { font: 800 clamp(1rem, 2.6vw, 2rem)/1 var(--font-cyber); letter-spacing: .1em; }
+.desktop-signature > span:last-child { font-size: .65rem; letter-spacing: .2em; }
+.desktop-hint { position: absolute; bottom: .8rem; right: 1.75rem; color: var(--color-ink-dim); font-size: .8rem; }
+html[data-desktop="ready"] .desktop-windows .window {
+  position: absolute;
+  display: flex; flex-direction: column;
+  left: clamp(7.5rem, calc(50vw - 21rem + var(--window-offset)), calc(100vw - 39rem));
+  top: clamp(.75rem, calc(8vh + var(--window-offset)), 20vh);
+  width: min(43rem, calc(100vw - 9rem));
+  max-height: calc(100dvh - 4.5rem - clamp(.75rem, calc(8vh + var(--window-offset)), 20vh));
+  overflow: hidden;
+}
+html[data-desktop="ready"] .desktop-windows .window:focus-visible { outline: 2px solid var(--color-neon-cyan); outline-offset: 2px; }
+html[data-desktop="ready"] .window-content { overflow: auto; overscroll-behavior: contain; min-height: 0; scrollbar-width: thin; scrollbar-color: var(--color-edge) var(--color-void); }
+html[data-desktop="ready"] .window > header, html[data-desktop="ready"] .window > footer { flex-shrink: 0; }
+[data-window-handle] { cursor: grab; touch-action: none; }
+.is-dragging [data-window-handle] { cursor: grabbing; }
+html[data-desktop="ready"] .desktop-windows .window.is-maximized {
+  position: absolute; inset: .4rem; width: auto; max-height: none; transform: none;
+}
+.taskbtn[aria-pressed="true"] { border-color: var(--color-bevel-dark) var(--color-bevel-light) var(--color-bevel-light) var(--color-bevel-dark); color: var(--color-neon-cyan); background: var(--color-night); }
+.welcome-content nav { gap: .5rem; }
+.welcome-content nav a { font-size: .5rem; padding-inline: .65rem; }
+.welcome-content img { max-height: 17rem; max-width: 100%; object-fit: contain; }
+.welcome-content > div:first-child > p { margin-top: .8rem; }
+@media (max-width: 900px) {
+  html[data-desktop="ready"] .desktop-windows .window { left: 7.5rem; width: calc(100vw - 8.5rem); }
+}
+@media (max-width: 639px) {
+  .desktop-shortcuts { inset: .6rem .3rem auto; flex-direction: row; justify-content: space-around; gap: .1rem; }
+  .desktop-shortcut { width: 19%; min-height: 4.4rem; font-size: .75rem; }
+  .desktop-icon { width: 1.8rem; height: 1.8rem; }
+  .desktop-hint, .desktop-signature { display: none; }
+  html[data-desktop="ready"] .desktop-windows .window,
+  html[data-desktop="ready"] .desktop-windows .window.is-maximized {
+    inset: 5.5rem .4rem 2.5rem !important; width: auto; max-height: none; transform: none;
+  }
+  html[data-desktop="ready"] .desktop-windows .window.is-maximized { top: .4rem !important; }
+  [data-window-handle] { cursor: default; }
+  .window-content { padding: .7rem; }
+  .welcome-content { padding: .25rem; }
+  .welcome-content > div:nth-child(2) { display: none; }
+  .welcome-content h1 { font-size: 1.7rem; }
+  .welcome-content nav { margin-top: 1rem; }
+  .welcome-content nav a { min-height: 2.2rem; }
+  .desktop-windows .titlebar h2 { font-size: .5rem; }
+  #taskbar-windows { height: 2.25rem; }
+  #taskbar-windows .taskbtn { height: 1.7rem; font-size: .45rem; max-width: 9rem; }
+  #show-desktop { margin-right: auto; }
+}
+@media (max-height: 500px) and (min-width: 640px) {
+  .desktop-shortcuts { flex-direction: row; flex-wrap: wrap; width: 6rem; gap: 0; top: .25rem; }
+  .desktop-shortcut { min-height: 2.5rem; flex-direction: row; width: 6rem; font-size: .65rem; }
+  .desktop-icon { width: 1.4rem; height: 1.4rem; flex-shrink: 0; }
+  html[data-desktop="ready"] .desktop-windows .window { top: .4rem; max-height: calc(100dvh - 3.5rem); }
+}

@@ -1,0 +1,34 @@
+---
+import { sections } from '../data/sections';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const shortcuts = [
+  { id: 'welcome', label: lang === 'es' ? 'Mi escritorio' : 'My desktop', icon: 'monitor' },
+  ...sections.map((section) => ({ id: section.id, label: t(section.label), icon: section.id })),
+];
+const paths: Record<string, string> = {
+  monitor: 'M3 4h26v19H3z M11 29h10 M16 23v6 M7 8h18v11H7z',
+  about: 'M10 4h12v12H10z M5 29v-5l5-5h12l5 5v5z M14 9h4',
+  projects: 'M3 9h11l3 4h12v15H3z M3 9V5h10l4 4h10v4',
+  stack: 'M12 7 3 16l9 9 M20 7l9 9-9 9 M18 4l-4 24',
+  contact: 'M3 6h26v21H3z M3 7l13 12L29 7 M3 27l9-11 M29 27l-9-11',
+};
+---
+<nav class="desktop-shortcuts" aria-label={t('nav.label')}>
+  {shortcuts.map((item) => (
+    <a class="desktop-shortcut" href={`#${item.id}`}>
+      <span class={`desktop-icon desktop-icon-${item.icon}`} aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"><path d={paths[item.icon]} /></svg>
+        <span class="shortcut-arrow">↗</span>
+      </span>
+      <span>{item.label}</span>
+    </a>
+  ))}
+</nav>
+<div class="desktop-signature" aria-hidden="true">
+  <span>PANDACODE<span class="text-neon-pink"> OS</span></span>
+  <span>PERSONAL EDITION / VOL. 01</span>
+</div>
+<p class="desktop-hint">{lang === 'es' ? 'Abre un icono para explorar · Arrastra las ventanas' : 'Open an icon to explore · Drag windows to move'}</p>
+<noscript><style is:global>html body { overflow: auto; } .desktop-windows .window { position: relative; inset: auto; width: auto; max-height: none; margin: 1rem; } .desktop-shortcuts, .desktop-hint { display: none; } #desktop-workspace { height: auto; overflow: visible; } .desktop-windows { padding-bottom: 3rem; }</style></noscript>

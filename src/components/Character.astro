@@ -1,0 +1,41 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+const t = useTranslations(getLangFromUrl(Astro.url));
+
+// Busca automáticamente tu ilustración: src/assets/character.png (o .webp, .jpg, .gif, .avif)
+const found = import.meta.glob<{ default: ImageMetadata }>(
+  '../assets/character.{png,webp,jpg,jpeg,gif,avif}',
+  { eager: true },
+);
+const art = Object.values(found)[0]?.default;
+---
+
+{/* Si existe tu ilustración se muestra; si no, un marcador de posición */}
+{
+  art ? (
+    <Image
+      src={art}
+      alt={t('hero.characterAlt')}
+      widths={[360, 540, 720]}
+      sizes="(min-width: 768px) 40vw, 70vw"
+      loading="eager"
+      class="animate-float h-auto max-h-[34vh] w-auto drop-shadow-[0_0_22px_rgb(255_43_214/0.35)] md:max-h-[62vh]"
+    />
+  ) : (
+    <div class="bevel-in flex aspect-[4/5] w-full max-w-[12rem] flex-col justify-between bg-night p-4 text-neon-cyan">
+      <div class="flex items-center justify-between border-b border-edge pb-2 text-sm">
+        <span>DEV_PROFILE</span><span class="text-acid">●</span>
+      </div>
+      <svg viewBox="0 0 120 100" class="my-4 w-full" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M12 12h96v64H12zM12 25h96M22 19h3m5 0h3m5 0h3M45 39 33 50l12 11m30-22 12 11-12 11M66 34 54 67M44 88h32M60 76v12" />
+      </svg>
+      <div class="border-t border-edge pt-3 text-center">
+        <p class="font-pixel-bold text-[9px] tracking-wider text-neon-pink">FULLSTACK / DEV</p>
+        <p class="mt-2 text-base text-ink-dim">{getLangFromUrl(Astro.url) === 'es' ? 'De la idea al código.' : 'From idea to code.'}</p>
+      </div>
+    </div>
+  )
+}

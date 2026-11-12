@@ -1,0 +1,81 @@
+---
+import '../styles/global.css';
+import Boot from '../components/Boot.astro';
+import Desktop from '../components/Desktop.astro';
+import Taskbar from '../components/Taskbar.astro';
+import { getLangFromUrl, useTranslations, switchLangPath } from '../i18n/utils';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const { title = t('meta.title'), description = t('meta.description') } = Astro.props;
+---
+
+<!doctype html>
+<html lang={lang} data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0a0614" />
+    <title>{title}</title>
+
+    <!-- Alternativas de idioma para SEO -->
+    <link rel="alternate" hreflang="es" href={switchLangPath(Astro.url, 'es')} />
+    <link rel="alternate" hreflang="en" href={switchLangPath(Astro.url, 'en')} />
+
+    <!-- Sin JavaScript no hay pantalla de arranque -->
+    <noscript><style>#boot{display:none !important}</style></noscript>
+
+    <!--
+      Antes de pintar: aplica el tema guardado (evita el parpadeo)
+      y decide si se salta el arranque (ya se vio en esta sesión o movimiento reducido).
+    -->
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+        var theme = 'dark';
+        try {
+          var saved = localStorage.getItem('theme');
+          if (saved === 'light' || saved === 'dark') theme = saved;
+        } catch (e) {}
+        root.dataset.theme = theme;
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', theme === 'light' ? '#2bb8ff' : '#0a0614');
+
+        try {
+          var seen = sessionStorage.getItem('booted');
+          var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if (seen || reduced) root.dataset.boot = 'skip';
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <Boot />
+    <Desktop />
+
+    <!--
+      pb-11 = altura de la barra de tareas (h-11).
+      Sin `relative`/`z-index`: así una ventana maximizada (z-40) queda por encima del fondo oscuro (z-30).
+    -->
+    <div>
+      <slot />
+    </div>
+
+    <!-- Fondo oscuro detrás de una ventana maximizada -->
+
+    <Taskbar />
+
+    <script>
+      import '../scripts/boot';
+      import '../scripts/desktop';
+    </script>
+  </body>
+</html>
